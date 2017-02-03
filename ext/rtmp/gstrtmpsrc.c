@@ -346,6 +346,8 @@ gst_rtmp_src_create (GstPushSrc * pushsrc, GstBuffer ** buffer)
   data = map.data;
   bsize = 0;
 
+  GST_OBJECT_LOCK(src);
+  
   while (todo > 0) {
     int read = RTMP_Read (src->rtmp, (char *) data, todo);
 
@@ -368,6 +370,9 @@ gst_rtmp_src_create (GstPushSrc * pushsrc, GstBuffer ** buffer)
     }
     GST_LOG ("  got size %d", read);
   }
+  
+  GST_OBJECT_UNLOCK(src);
+  
   gst_buffer_unmap (buf, &map);
   gst_buffer_resize (buf, 0, bsize);
 
@@ -633,10 +638,15 @@ gst_rtmp_src_unlock (GstBaseSrc * basesrc)
 
   /* This closes the socket, which means that any pending socket calls
    * error out. */
+  
+  GST_OBJECT_LOCK(rtmpsrc);
+  
   if (rtmpsrc->rtmp) {
     RTMP_Close (rtmpsrc->rtmp);
   }
 
+  GST_OBJECT_UNLOCK(rtmpsrc);
+  
   return TRUE;
 }
 
