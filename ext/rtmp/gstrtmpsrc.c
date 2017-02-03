@@ -346,7 +346,7 @@ gst_rtmp_src_create (GstPushSrc * pushsrc, GstBuffer ** buffer)
   data = map.data;
   bsize = 0;
 
-  GST_OBJECT_LOCK(src);
+  //GST_OBJECT_LOCK(src);
   
   while (todo > 0) {
     int read = RTMP_Read (src->rtmp, (char *) data, todo);
@@ -371,7 +371,7 @@ gst_rtmp_src_create (GstPushSrc * pushsrc, GstBuffer ** buffer)
     GST_LOG ("  got size %d", read);
   }
   
-  GST_OBJECT_UNLOCK(src);
+  //GST_OBJECT_UNLOCK(src);
   
   gst_buffer_unmap (buf, &map);
   gst_buffer_resize (buf, 0, bsize);
@@ -641,9 +641,11 @@ gst_rtmp_src_unlock (GstBaseSrc * basesrc)
   
   GST_OBJECT_LOCK(rtmpsrc);
   
+  GST_DEBUG_OBJECT (rtmpsrc, "BEFORE RTMP_Close");
   if (rtmpsrc->rtmp) {
     RTMP_Close (rtmpsrc->rtmp);
   }
+  GST_DEBUG_OBJECT (rtmpsrc, "AFTER RTMP_Close");
 
   GST_OBJECT_UNLOCK(rtmpsrc);
   
@@ -658,10 +660,12 @@ gst_rtmp_src_stop (GstBaseSrc * basesrc)
 
   src = GST_RTMP_SRC (basesrc);
 
+  GST_DEBUG_OBJECT (src, "AFTER RTMP_Close");
   if (src->rtmp) {
     RTMP_Free (src->rtmp);
     src->rtmp = NULL;
   }
+  GST_DEBUG_OBJECT (src, "AFTER RTMP_Close");
 
   src->cur_offset = 0;
   src->last_timestamp = 0;
